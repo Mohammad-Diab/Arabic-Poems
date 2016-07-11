@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -19,7 +21,7 @@ using Windows.UI.Xaml.Shapes;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace Poetry
+namespace Poetry_2
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -39,7 +41,7 @@ namespace Poetry
             get { return view; }
             set
             {
-                switch(view)
+                switch (view)
                 {
                     case WindowState.MobileP:
                     case WindowState.MobileLandscape:
@@ -90,10 +92,10 @@ namespace Poetry
 
             searchResult_list.Margin = new Thickness(5, 135, 10, 84);
             searchResult_list.FontSize = 16;
-            if (ActualHeight < 360)
-                searchResult_list.MaxHeight = ActualHeight;
-            else
-                searchResult_list.MaxHeight = ActualHeight - 200;
+            //if (ActualHeight < 360)
+            //    searchResult_list.MaxHeight = ActualHeight;
+            //else
+            //    searchResult_list.MaxHeight = ActualHeight - 200;
 
             saparated.Margin = new Thickness(5, 122, 10, 10);
             saparated.VerticalAlignment = VerticalAlignment.Top;
@@ -145,7 +147,7 @@ namespace Poetry
 
             searchResult_list.Margin = new Thickness(415, 85, 5, 30);
             searchResult_list.FontSize = 20;
-            searchResult_list.MaxHeight = Double.NaN;
+            //searchResult_list.MaxHeight = Double.NaN;
 
             saparated.Margin = new Thickness(405, 40, 0, 40);
             saparated.VerticalAlignment = VerticalAlignment.Stretch;
@@ -188,6 +190,11 @@ namespace Poetry
             Page_SizeChanged(null, null);
             view = WindowState.HDLandscape;
             searchResult_list.DataContext = searchResult_data;
+            await SelectFile();
+        }
+
+        private async Task SelectFile()
+        {
             FileOpenPicker fop = new FileOpenPicker();
 
             fop.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
@@ -195,13 +202,18 @@ namespace Poetry
             StorageFile file = null;
             try { file = await fop.PickSingleFileAsync(); }
             catch (Exception ex) { await new MessageDialog(ex.Message, "عذرا حدث خطا ما").ShowAsync(); }
-            //if (file == null)
-            //    file = await StorageFile.GetFileFromPathAsync(@"d:\Poems.dat");
             if (file != null)
             {
+                if (search_cancel != null)
+                    search_cancel.Cancel();
+                versifier_list.Items.Clear();
+                comboBox.Items.Clear();
+                searchResult_data.Clear();
                 br = new BinaryReader((await file.OpenReadAsync()).AsStream());
                 if (LoadIndises(br))
                 {
+                    empty_state.Visibility = Visibility.Collapsed;
+                    await Favourites.Load();
                     Random rand = new Random(DateTime.UtcNow.Millisecond);
                     int v = rand.Next(Versifier.VersifiersList.Count);
                     int p = rand.Next(Versifier.VersifiersList[v].Poems.Count);
@@ -209,12 +221,15 @@ namespace Poetry
                 }
                 else
                 {
+                    Versifier.VersifiersList = null;
+                    current_poem = null;
+                    listView.Items.Clear();
+                    poem_name.Text = "القصيدة";
+                    versifier_name.Text = "الشاعر";
+                    empty_state.Visibility = Visibility.Visible;
                     await new MessageDialog("عذرا حدث خطا ما أثناء قراءة الملفات.", "الشعر العربي").ShowAsync();
-                    //Application.Current.Exit();
                 }
             }
-            //else
-            //    Application.Current.Exit();
         }
 
         private bool LoadIndises(BinaryReader br)
@@ -225,6 +240,8 @@ namespace Poetry
                 var file_header = br.ReadBytes(8);
                 byte[] orginal_header = { 0xAC, 0x4D, 0x0F, 0x14, 0xF2, 0x82, 0x7C, 0xBB };
                 //check header
+                if (!file_header.SequenceEqual(orginal_header))
+                    return false;
 
                 //string text = "Arabic poems encrypted pack, version 1.0, by Mohammad Diab.";
                 byte[] orginal_file_info = { 0x41, 0x72, 0x61, 0x62, 0x69, 0x63, 0x20, 0x70, 0x6F, 0x65, 0x6D, 0x73, 0x20, 0x65, 0x6E, 0x63, 0x72, 0x79,
@@ -344,7 +361,17 @@ namespace Poetry
 
         private async void FavouriteButton_Click(object sender, RoutedEventArgs e)
         {
-            await new FavouriteList().ShowAsync();
+            FavouriteList FL = new FavouriteList();
+            FL.current_poem = current_poem;
+            await FL.ShowAsync();
+            if (FL.selected_poem != null)
+                ViewPoem(FL.selected_poem);
+        }
+
+        private async void AboutButton_Click(object sender, RoutedEventArgs e)
+        {
+            var version = Windows.ApplicationModel.Package.Current.Id.Version;
+            await new MessageDialog(string.Format("الشعر العربي\nالإصدار {0}.{1}.{2}.{3}\nMohammad Diab\n2016", version.Major, version.Minor, version.Build, version.Revision), Windows.ApplicationModel.Package.Current.DisplayName).ShowAsync();
         }
 
 
@@ -445,7 +472,7 @@ namespace Poetry
             }
 
 
-            
+
             //else
             //    grid.Height = t1.Margin.Top + t1.ActualHeight + 10;
 
@@ -471,40 +498,43 @@ namespace Poetry
 
         private async void FindInPageButton_Click(object sender, RoutedEventArgs e)
         {
+            if (current_poem == null || current_poem.poem == null)
+                return;
             if (search_result == null)
             {
                 RestSearch();
                 search_result = new List<int>();
-                if (HelperFunctions.RemoveAccents(search_box.Text).Length > 1)
+                string word = HelperFunctions.RemoveAccents(search_box.Text.Trim());
+                if (word.Length > 1)
                 {
-                    if (HelperFunctions.RemoveAccents(current_poem.poem).Contains(HelperFunctions.RemoveAccents(search_box.Text)))
+                    string[] sp = { "\r\n" };
+                    var split = current_poem.poem.Split(sp, StringSplitOptions.RemoveEmptyEntries);
+                    if (current_poem.is_vertical)
                     {
-                        string[] sp = { "\r\n" };
-                        var split = current_poem.poem.Split(sp, StringSplitOptions.RemoveEmptyEntries);
-                        if (current_poem.is_vertical)
+                        for (int i = 1; i < split.Length && i - 1 < listView.Items.Count; i++)
                         {
-                            for (int i = 1; i < split.Length; i++)
+                            if (HelperFunctions.RemoveAccents(split[i]).Contains(word))
                             {
-                                if (HelperFunctions.RemoveAccents(split[i]).Contains(HelperFunctions.RemoveAccents(search_box.Text)))
-                                    SelectWord(i - 1, search_box.Text, current_poem.is_vertical);
+                                SelectWord(i - 1, word, current_poem.is_vertical);
                                 search_result.Add(i - 1);
-                            }
-                        }
-                        else
-                        {
-                            for (int i = 1; i < split.Length; i += 2)
-                            {
-                                if ((HelperFunctions.RemoveAccents(split[i] + " " + split[i + 1])).Contains(HelperFunctions.RemoveAccents(search_box.Text)))
-                                {
-                                    SelectWord((i - 1) / 2, search_box.Text, current_poem.is_vertical);
-                                    search_result.Add((i - 1) / 2);
-                                }
                             }
                         }
                     }
                     else
                     {
-                        listView.ScrollIntoView(listView.Items[0]);
+                        for (int i = 1; i < split.Length && (i - 1) / 2 < listView.Items.Count; i += 2)
+                        {
+                            if ((HelperFunctions.RemoveAccents(i + 1 < split.Length ? split[i] + " " + split[i + 1] : split[i])).Contains(word))
+                            {
+                                SelectWord((i - 1) / 2, word, current_poem.is_vertical);
+                                search_result.Add((i - 1) / 2);
+                            }
+                        }
+                    }
+                    if (search_result.Count == 0)
+                    {
+                        if (listView.Items.Count > 0)
+                            listView.ScrollIntoView(listView.Items[0]);
                         await new MessageDialog("لا توجد نتائج", "الشعر العربي").ShowAsync();
                     }
                 }
@@ -519,6 +549,12 @@ namespace Poetry
             }
         }
 
+        private void SearchBox_KeyDown(object sender, Windows.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter)
+                FindInPageButton_Click(sender, null);
+        }
+
         private void SelectWord(int line_number, string text, bool is_vertical)
         {
             Grid gr = listView.Items[line_number] as Grid;
@@ -526,7 +562,7 @@ namespace Poetry
             TextBlock t1 = gr.Children[2] as TextBlock;
             List<Run> tmp = new List<Run>();
 
-            var indises = FindIndicess(t1.Text, HelperFunctions.RemoveAccents(text));
+            var indises = FindIndicess(t1.Text, text);
             for (int i = 1; i < indises.Count; i++)
             {
                 Run r1 = new Run();
@@ -553,7 +589,7 @@ namespace Poetry
             if (!is_vertical)
             {
                 TextBlock t2 = gr.Children[3] as TextBlock;
-                indises = FindIndicess(t2.Text, HelperFunctions.RemoveAccents(text));
+                indises = FindIndicess(t2.Text, text);
                 for (int i = 1; i < indises.Count; i++)
                 {
                     Run r1 = new Run();
@@ -582,7 +618,7 @@ namespace Poetry
         {
             List<Point> indexes = new List<Point>();
             indexes.Add(new Point(0, 0));
-            string Accent = "ًٌٍَُِّْ";
+            string Accent = HelperFunctions.Accents;
 
             for (int i = 0; i < Text.Length; i++)
             {
@@ -619,7 +655,7 @@ namespace Poetry
                     }
                     if (ind > -1)
                     {
-                        i += length;
+                        i += length - 1;
                         indexes.Add(new Point(ind, length));
                     }
                 }
@@ -715,6 +751,8 @@ namespace Poetry
 
         //ObservableCollection<NameWithIndex> versifier_data = new ObservableCollection<NameWithIndex>();
         ObservableCollection<SearchResult> searchResult_data = new ObservableCollection<SearchResult>();
+        CancellationTokenSource search_cancel;
+        const int max_results = 2000;
 
         private void PivotSearch_PointerEntered(object sender, Windows.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
@@ -752,7 +790,7 @@ namespace Poetry
 
             //    info_grid.VerticalAlignment = VerticalAlignment.Bottom;
             //    info_grid.Margin = new Thickness(5, 0, 5, 30);
-                
+
 
             //    versifierName_textblock.FontSize = 14;
             //    versifierName_textblock.Margin = new Thickness(0, 5, 0, 0);
@@ -772,7 +810,7 @@ namespace Poetry
             {
                 if (versifier_list.Items.Count == 0)
                 {
-                    for (int i = 0; i <Versifier.VersifiersList.Count; i++)
+                    for (int i = 0; i < Versifier.VersifiersList.Count; i++)
                         versifier_list.Items.Add(MakeVersifierListItem(Versifier.VersifiersList[i].name, i));
                 }
                 else
@@ -803,30 +841,32 @@ namespace Poetry
                 i.IsChecked = false;
         }
 
-        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        private async void SearchButton_Click(object sender, RoutedEventArgs e)
         {
+            if (search_cancel != null)
+            {
+                search_cancel.Cancel();
+                return;
+            }
+            if (Versifier.VersifiersList == null)
+                return;
             bool Ignore_def = ignore_difference.IsChecked.Value;
-            string search_word = Ignore_def ? HelperFunctions.RemoveAccents(search_textbox.Text) : search_textbox.Text;
+            string search_word = Ignore_def ? HelperFunctions.RemoveAccents(search_textbox.Text.Trim()) : search_textbox.Text.Trim();
             bool save_in_memory = checkBox.IsChecked.Value;
             Progress_bar.Value = 0;
             if (search_word.Length > 1)
             {
                 long start_time = DateTime.Now.Ticks;
-                Progress_bar.Visibility = Visibility.Visible;
-                //BackgroundWorker bw = new BackgroundWorker();
-                //bw.WorkerReportsProgress = true;
                 List<int> selected_versifiers = new List<int>();
                 Progress_bar.Maximum = 0;
-                int ind = 0;
                 if (versifier_list.Visibility == Visibility.Visible)
                     foreach (CheckBox i in versifier_list.Items)
                     {
                         if (i.IsChecked.Value)
                         {
                             Progress_bar.Maximum += Versifier.VersifiersList[Convert.ToInt32(i.Tag)].Poems.Count;
-                            selected_versifiers.Add(ind);
+                            selected_versifiers.Add(Convert.ToInt32(i.Tag));
                         }
-                        ind++;
                     }
                 else
                 {
@@ -846,83 +886,100 @@ namespace Poetry
                     }
                 }
                 if (selected_versifiers.Count == 0)
+                {
+                    await new MessageDialog("حدد شاعرا واحدا على الأقل", "الشعر العربي").ShowAsync();
                     return;
+                }
                 searchResult_data.Clear();
-                search_button.IsEnabled = versifier_list.IsEnabled = selectNone_button.IsEnabled = selectAll_button.IsEnabled = false;
+                Progress_bar.Visibility = Visibility.Visible;
+                versifier_list.IsEnabled = comboBox.IsEnabled = selectNone_button.IsEnabled = selectAll_button.IsEnabled = false;
+                search_icon.Symbol = Symbol.Cancel;
+                search_cancel = new CancellationTokenSource();
+                var token = search_cancel.Token;
+                var reader = br;
+                var versifiers = Versifier.VersifiersList;
+                bool more = false;
                 List<Poem> p_list = new List<Poem>();
                 List<string> l_list = new List<string>();
+                IProgress<int> progress = new Progress<int>((count) => { Progress_bar.Value += count; });
 
-                //bw.DoWork += (object send, DoWorkEventArgs args) =>
-                Task m = new Task(() =>
+                await Task.Run(() =>
                 {
-                    //foreach (var i in versifier_data)
-                    //    if (i.IsSelected)
-                    //        foreach (var j in Versifier.VersifiersList[i.Index].Poems)
-                    //            j.ReadPoem(save_in_memory, br);
+                    string[] splitter = { "\r\n" };
                     foreach (int i in selected_versifiers)
-                    //Parallel.ForEach(versifier_data,(i)=>
                     {
-                        foreach (var j in Versifier.VersifiersList[i].Poems)
-                        //Parallel.ForEach(Versifier.VersifiersList[i.Index].Poems, (j) =>
+                        foreach (var j in versifiers[i].Poems)
                         {
-                            string Tmp = j.ReadPoem(save_in_memory, br);
+                            if (token.IsCancellationRequested || more)
+                                break;
+                            string Tmp = j.ReadPoem(save_in_memory, reader);
+                            if (Tmp == null)
+                                continue;
                             string search_in = Ignore_def ? HelperFunctions.RemoveAccents(Tmp) : Tmp;
                             if (search_in.Contains(search_word))
                             {
-                                string[] splitter = { "\r\n" };
-                                var lines = search_in.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
+                                var lines = Tmp.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
                                 for (int k = 1; k < lines.Length; k++)
                                 {
-                                    if (lines[k].Contains(search_word))
+                                    if ((Ignore_def ? HelperFunctions.RemoveAccents(lines[k]) : lines[k]).Contains(search_word))
                                     {
+                                        if (p_list.Count == max_results)
+                                        {
+                                            more = true;
+                                            break;
+                                        }
                                         p_list.Add(j);
                                         if (j.is_vertical)
                                             l_list.Add(lines[k]);
-                                        else
+                                        else if (k % 2 == 0)
+                                            l_list.Add(lines[k - 1] + " " + lines[k]);
+                                        else if (k + 1 < lines.Length)
                                         {
-                                            if (k - 1 > -1 && k + 1 < lines.Length)
-                                            {
-                                                if (k % 2 == 0)
-                                                    l_list.Add(lines[k - 1] + " " + lines[k]);
-                                                else
-                                                {
-                                                    l_list.Add(lines[k] + " " + lines[k + 1]);
-                                                    k++;
-                                                }
-                                            }
-                                            else
-                                                l_list.Add(lines[k]);
+                                            l_list.Add(lines[k] + " " + lines[k + 1]);
+                                            k++;
                                         }
+                                        else
+                                            l_list.Add(lines[k]);
                                     }
                                 }
                             }
-                            //bw.ReportProgress(1);
                         }
+                        progress.Report(versifiers[i].Poems.Count);
+                        if (token.IsCancellationRequested || more)
+                            break;
                     }
                 });
 
-                //bw.ProgressChanged += (object send, ProgressChangedEventArgs args) =>
-                //{
-                //    Progress_bar.Value++;
-                //};
-                //bw.RunWorkerCompleted += (object send, RunWorkerCompletedEventArgs args) =>
-                //{
-                //    for (int i = 0; i < l_list.Count && i < p_list.Count; i++)
-                //        searchResult_data.Add(new SearchResult(l_list[i], p_list[i]));
-                //    search_button.IsEnabled = versifier_list.IsEnabled = selectNone_button.IsEnabled = selectAll_button.IsEnabled  = true;
-                //    Progress_bar.Visibility = Visibility.Collapsed;
-                //    resultCount_textblock.Text = HelperFunctions.ReturnNumbered(searchResult_data.Count, "نتيجة واحدة", "نتيجتان", "نتيجة", "نتائج");
-                //    searchTime_textblock.Text = "زمن البحث: " + Math.Round((DateTime.Now.Ticks - start_time) / 10000000.0, 3) + " ثانية";
-                //};
-                m.RunSynchronously();
-                m.Wait();
                 for (int i = 0; i < l_list.Count && i < p_list.Count; i++)
                     searchResult_data.Add(new SearchResult(l_list[i], p_list[i]));
-                search_button.IsEnabled = versifier_list.IsEnabled = selectNone_button.IsEnabled = selectAll_button.IsEnabled = true;
+                search_cancel = null;
+                search_icon.Symbol = Symbol.Find;
+                versifier_list.IsEnabled = comboBox.IsEnabled = selectNone_button.IsEnabled = selectAll_button.IsEnabled = true;
                 Progress_bar.Visibility = Visibility.Collapsed;
-                resultCount_textblock.Text = HelperFunctions.ReturnNumbered(searchResult_data.Count, "نتيجة واحدة", "نتيجتان", "نتيجة", "نتائج");
+                resultCount_textblock.Text = (more ? "أول " : "") + HelperFunctions.ReturnNumbered(searchResult_data.Count, "نتيجة واحدة", "نتيجتان", "نتيجة", "نتائج") + (token.IsCancellationRequested ? " (تم ايقاف البحث)" : "");
                 searchTime_textblock.Text = "زمن البحث: " + Math.Round((DateTime.Now.Ticks - start_time) / 10000000.0, 3) + " ثانية";
-                //bw.RunWorkerAsync();
+                if (searchResult_data.Count == 0 && !token.IsCancellationRequested)
+                    await new MessageDialog("لا توجد نتائج", "الشعر العربي").ShowAsync();
+            }
+            else
+                await new MessageDialog("كلمة البحث قصيرة", "الشعر العربي").ShowAsync();
+        }
+
+        private void SearchTextbox_KeyDown(object sender, Windows.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter)
+                SearchButton_Click(sender, null);
+        }
+
+        private void SearchResultList_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            var result = e.ClickedItem as SearchResult;
+            if (result != null)
+            {
+                pivot.SelectedIndex = 0;
+                ViewPoem(result.PoemPointer);
+                search_box.Text = search_textbox.Text.Trim();
+                search_in_page.Visibility = Visibility.Visible;
             }
         }
 
@@ -939,33 +996,7 @@ namespace Poetry
 
         private async void LoadFile_Click(object sender, RoutedEventArgs e)
         {
-            searchResult_list.DataContext = searchResult_data;
-            FileOpenPicker fop = new FileOpenPicker();
-            fop.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            fop.FileTypeFilter.Add(".dat");
-            StorageFile file = null;
-            try { file = await fop.PickSingleFileAsync(); }
-            catch (Exception ex) { await new MessageDialog(ex.Message, "عذرا حدث خطا ما").ShowAsync(); }
-            //if (file == null)
-            //    file = await StorageFile.GetFileFromPathAsync(@"d:\Poems.dat");
-            if (file != null)
-            {
-                br = new BinaryReader((await file.OpenReadAsync()).AsStream());
-                if (!LoadIndises(br))
-                {
-                    await new MessageDialog("عذرا حدث خطا ما أثناء قراءة الملفات.", "الشعر العربي").ShowAsync();
-                    Application.Current.Exit();
-                }
-                else
-                {
-                    Random rand = new Random(DateTime.UtcNow.Millisecond);
-                    int v = rand.Next(Versifier.VersifiersList.Count);
-                    int p = rand.Next(Versifier.VersifiersList[v].Poems.Count);
-                    ViewPoem(Versifier.VersifiersList[v].Poems[p]);
-                }
-            }
-            else
-                Application.Current.Exit();
+            await SelectFile();
         }
 
         private void Pivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1094,10 +1125,15 @@ namespace Poetry
             if (poem == "")
             {
                 //Read poem from the file
-                br.BaseStream.Position = start;
                 byte[] poem_encrypted_bytes = new byte[1];
                 try
-                { poem_encrypted_bytes = br.ReadBytes(Convert.ToInt32(length)); }
+                {
+                    lock (br)
+                    {
+                        br.BaseStream.Position = start;
+                        poem_encrypted_bytes = br.ReadBytes(Convert.ToInt32(length));
+                    }
+                }
                 catch (Exception)
                 { return null; }
 
@@ -1117,10 +1153,15 @@ namespace Poetry
             if (poem == "")
             {
                 //Read poem from the file
-                br.BaseStream.Position = start;
                 byte[] poem_encrypted_bytes = new byte[1];
                 try
-                { poem_encrypted_bytes = br.ReadBytes(Convert.ToInt32(length)); }
+                {
+                    lock (br)
+                    {
+                        br.BaseStream.Position = start;
+                        poem_encrypted_bytes = br.ReadBytes(Convert.ToInt32(length));
+                    }
+                }
                 catch (Exception ex)
                 {
                     error_message = ex.Message;
@@ -1158,9 +1199,15 @@ namespace Poetry
 
     internal static class HelperFunctions
     {
+        internal const string Accents = "ًٌٍَُِّْٰـ";
+
         internal static string RemoveAccents(string str)
         {
-            return str.Replace("ى", "ي").Replace("ة", "ه").Replace("أ", "ا").Replace("إ", "ا").Replace("آ", "ا").Replace("َ", "").Replace("ً", "").Replace("ً", "").Replace("ُ", "").Replace("ٌ", "").Replace("ِ", "").Replace("ٍ", "").Replace("ّ", "").Replace("ْ", ""); ;
+            StringBuilder sb = new StringBuilder(str.Length);
+            foreach (char ch in str)
+                if (Accents.IndexOf(ch) < 0)
+                    sb.Append(OptimizeChars(ch));
+            return sb.ToString();
         }
 
         internal static string DecrptText(byte[] bytes, byte[] password)
@@ -1187,9 +1234,13 @@ namespace Poetry
                 case 'أ':
                 case 'إ':
                 case 'آ':
+                case 'ٱ':
                     return 'ا';
                 case 'ى':
+                case 'ئ':
                     return 'ي';
+                case 'ؤ':
+                    return 'و';
                 case 'ة':
                     return 'ه';
                 default:
