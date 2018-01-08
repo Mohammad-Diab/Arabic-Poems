@@ -1,0 +1,60 @@
+﻿<Page
+    x:Class="Arabic_Poems.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Arabic_Poems"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" FlowDirection="RightToLeft">
+
+    <NavigationView x:Name="navview"  SelectedItem="home" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" ItemInvoked="OnNavigationViewItemInvoked" AlwaysShowHeader="False">
+        <NavigationView.MenuItems>
+            <NavigationViewItem x:Name="home" IsSelected="True" Icon="Home" Content="الصفحة الرئيسة" Tag="home"/>
+            <NavigationViewItem Content="المفضلة" Tag="fav">
+                <NavigationViewItem.Icon>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE728;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+            <NavigationViewItem Content="حول" Tag="about">
+                <NavigationViewItem.Icon>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE946;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
+        </NavigationView.MenuItems>
+        <NavigationView.AutoSuggestBox>
+            <AutoSuggestBox PlaceholderText="ابحث عن قصيدة أو شاعر" QueryIcon="Find"/>
+        </NavigationView.AutoSuggestBox>
+        <NavigationView.Content>
+            <Frame x:Name="ContentFrame">
+                <Frame.ContentTransitions>
+                    <TransitionCollection>
+                        <NavigationThemeTransition/>
+                    </TransitionCollection>
+                </Frame.ContentTransitions>
+            </Frame>
+        </NavigationView.Content>
+        <!--<NavigationView.HeaderTemplate>
+            <DataTemplate>
+                <CommandBar DefaultLabelPosition="Right">
+                <CommandBar.Content>
+                    <StackPanel>
+                        --><!-- ابحث في القصيدة الحالية - تصفية النتائج - الشعراء - القصائد--><!--
+                        <AutoSuggestBox x:Name="search_box" Margin="8" Width="225" PlaceholderText="ابحث في القصيدة الحالية" QueryIcon="Find"/>
+                    </StackPanel>
+                </CommandBar.Content>
+                <AppBarButton x:Name="select_poem_btn" Icon="OpenFile" Label="اختيار قصيدة"/>
+                <AppBarButton x:Name="switch_poem_btn" Icon="ReShare" Label="تبديل"/>
+                <AppBarSeparator x:Name="sep_1"/>
+                <AppBarButton x:Name="copy_poem_btn" Icon="Copy" Label="نسخ"/>
+                <AppBarButton x:Name="add_fav_btn" Label="اضافة للمفضلة">
+                    <AppBarButton.Icon>
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB51;"/>
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarSeparator x:Name="sep_2"/>
+                <AppBarButton x:Name="share_poem_btn" Icon="Share" Label="مشاركة"/>
+            </CommandBar>
+            </DataTemplate>
+        </NavigationView.HeaderTemplate>-->
+    </NavigationView>
+</Page>

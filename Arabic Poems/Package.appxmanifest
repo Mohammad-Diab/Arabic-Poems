@@ -7,14 +7,14 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="a3e6a53d-82de-4c9d-b292-f6bbd0b40d79"
+    Name="35918706-b0e6-4c72-b016-d25afd5cdfc8"
     Publisher="CN=DrMoh"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="a3e6a53d-82de-4c9d-b292-f6bbd0b40d79" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="35918706-b0e6-4c72-b016-d25afd5cdfc8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>Poetry 2</DisplayName>
+    <DisplayName>Arabic Poems</DisplayName>
     <PublisherDisplayName>DrMoh</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -30,12 +30,12 @@
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="Poetry_2.App">
+      EntryPoint="Arabic_Poems.App">
       <uap:VisualElements
-        DisplayName="Poetry 2"
+        DisplayName="Arabic Poems"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="Poetry 2"
+        Description="Arabic Poems"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
