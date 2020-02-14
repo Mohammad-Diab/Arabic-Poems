@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Controls;
 
 namespace Arabic_Poems
 {
@@ -90,6 +90,14 @@ namespace Arabic_Poems
                     return "الامارات";
                 case Country.Yemen:
                     return "اليمن";
+                case Country.IraqAndSham:
+                    return "العراق والشام";
+                case Country.ArabianPeninsula:
+                    return "الجزيرة العربية";
+                case Country.EgyptAndSudan:
+                    return "مصر والسودان";
+                case Country.Maghreb:
+                    return "المغرب العربي";
                 case Country.All:
                     return "كل الشعراء";
                 default:
@@ -125,10 +133,34 @@ namespace Arabic_Poems
                     return "بحر المجتث";
                 case Bahar.Khabab:
                     return "بحر الخبب";
+                case Bahar.Mutaqarib:
+                    return "البحر المتقارب";
+                case Bahar.Madid:
+                    return "البحر المديد";
+                case Bahar.Hazaj:
+                    return "بحر الهزج";
+                case Bahar.Mudari:
+                    return "البحر المضارع";
+                case Bahar.Muqtadab:
+                    return "البحر المقتضب";
+                case Bahar.Multiple:
+                    return "متعدد البحور";
+                case Bahar.FreeVerse:
+                    return "شعر التفعيلة / الحر";
+                case Bahar.Prose:
+                    return "قصيدة نثرية";
+                case Bahar.Muwashshah:
+                    return "الموشحات";
+                case Bahar.Dubait:
+                    return "الدوبيت";
+                case Bahar.Mawaliya:
+                    return "المواليا";
                 default:
-                    return "دول غير محددة";
+                    return "البحر غير معروف";
             }
         }
+
+        internal static readonly Bahar[] BaharOrder = { Bahar.Tawil, Bahar.Basit, Bahar.Kamil, Bahar.Wafir, Bahar.Rijz, Bahar.Raml, Bahar.Khafif, Bahar.Sarie, Bahar.Mutaqarib, Bahar.Munsarih, Bahar.Mujtath, Bahar.Mutadarik, Bahar.Madid, Bahar.Hazaj, Bahar.Mudari, Bahar.Muqtadab, Bahar.Multiple, Bahar.FreeVerse, Bahar.Prose, Bahar.Muwashshah, Bahar.Dubait, Bahar.Mawaliya };
 
         internal static string Poet(int Count)
         {
@@ -157,6 +189,135 @@ namespace Arabic_Poems
             else
                 return Count + " " + "قصيدة";
         }
+
+        internal static string Result(int Count)
+        {
+            if (Count < 1)
+                return "لا توجد نتائج";
+            else if (Count == 1)
+                return "نتيجة واحدة";
+            else if (Count == 2)
+                return "نتيجتان";
+            else if (Count < 11)
+                return Count + " نتائج";
+            else
+                return Count + " نتيجة";
+        }
+
+        internal static string FixAge(string age)
+        {
+            age = age.Trim();
+            if (age.StartsWith("ديو"))
+                age = age.Substring(3);
+            return age;
+        }
+
+        internal static Age GetAge(string age)
+        {
+            if (age.Contains("الجاهلي"))
+                return Age.Jahili;
+            else if (age.Contains("الإسلامي") || age.Contains("الاسلامي"))
+                return Age.Islam;
+            else if (age.Contains("العباسي"))
+                return Age.Abbasi;
+            else if (age.Contains("الأندلسي") || age.Contains("الاندلسي"))
+                return Age.Andalus;
+            else if (age.StartsWith("شعراء"))
+                return Age.Modern;
+            return Age.NotSpecefic;
+        }
+
+        internal static Country GetRegion(string age)
+        {
+            if (age.Contains("العراق"))
+                return Country.IraqAndSham;
+            else if (age.Contains("الجزيرة"))
+                return Country.ArabianPeninsula;
+            else if (age.Contains("مصر"))
+                return Country.EgyptAndSudan;
+            else if (age.Contains("المغرب"))
+                return Country.Maghreb;
+            return Country.NotSpecefic;
+        }
+
+        internal const string Accents = "ًٌٍَُِّْٰـ";
+
+        internal static string RemoveAccents(string str)
+        {
+            StringBuilder sb = new StringBuilder(str.Length);
+            foreach (char ch in str)
+                if (Accents.IndexOf(ch) < 0)
+                    sb.Append(OptimizeChars(ch));
+            return sb.ToString();
+        }
+
+        internal static char OptimizeChars(char ch)
+        {
+            switch (ch)
+            {
+                case 'أ':
+                case 'إ':
+                case 'آ':
+                case 'ٱ':
+                    return 'ا';
+                case 'ى':
+                case 'ئ':
+                    return 'ي';
+                case 'ؤ':
+                    return 'و';
+                case 'ة':
+                    return 'ه';
+                default:
+                    return ch;
+            }
+        }
+
+        static Random rand = new Random(DateTime.Now.Millisecond);
+
+        internal static string RandomPoemTag()
+        {
+            int v = rand.Next(Versifier.VersifiersList.Count);
+            int p = rand.Next(Versifier.VersifiersList[v].Poems.Count);
+            return "n" + (v * 10000 + p);
+        }
+
+        internal static void Navigate(Type page, object parameter)
+        {
+            var main = (Window.Current.Content as Frame).Content as MainPage;
+            if (main != null && Versifier.VersifiersList != null)
+                main.rootFram.Navigate(page, parameter);
+        }
+
+        internal static async void SelectPoem()
+        {
+            if (Versifier.VersifiersList == null)
+                return;
+            var dialog = new Pages.SelectPoem();
+            await dialog.ShowAsync();
+            if (dialog.selected_tag != null)
+                Navigate(typeof(Pages.view), dialog.selected_tag);
+        }
+
+        internal static string PoemText(Poem poem)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(poem.name.Trim());
+            sb.AppendLine(poem.versifier.name.Trim());
+            sb.AppendLine();
+            string[] splitter = { "\r\n" };
+            var lines = poem.poem.Split(splitter, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 1; i < lines.Length; i++)
+            {
+                if (!poem.is_vertical && i + 1 < lines.Length)
+                {
+                    sb.AppendLine(lines[i] + "     " + lines[i + 1]);
+                    i++;
+                }
+                else
+                    sb.AppendLine(lines[i]);
+            }
+            return sb.ToString();
+        }
     }
 
     internal class Versifier
@@ -169,7 +330,6 @@ namespace Arabic_Poems
         public int peoms_count;
         public Age poet_age;
         public Country poet_country;
-        static Random rand = new Random(DateTime.Now.Millisecond);
 
         internal List<Poem> Poems;
 
@@ -177,12 +337,12 @@ namespace Arabic_Poems
         {
             name = n;
             id = i;
-            age = a;
+            age = Functions.FixAge(a);
             peoms_count = 0;
             info = inf;
             Poems = new List<Poem>();
-            poet_age = (Age)rand.Next(1, 11);
-            poet_country = (Country)rand.Next(1, 20);
+            poet_age = Functions.GetAge(age);
+            poet_country = Functions.GetRegion(age);
             VersifiersList.Add(this);
         }
 
@@ -216,7 +376,7 @@ namespace Arabic_Poems
         public string poem;
         public Bahar poem_bahar;
         public long start, length;
-        static Random rand = new Random(DateTime.Now.Millisecond);
+        internal string search_name;
 
         public Poem(string n, int i, Versifier v, string sr, bool is_vertical, long start, long length)
         {
@@ -227,7 +387,7 @@ namespace Arabic_Poems
             this.start = start;
             this.length = length;
             this.is_vertical = is_vertical;
-            poem_bahar = (Bahar)rand.Next(1, 13);
+            poem_bahar = Bahar.NotSpecefic;
         }
 
         public void SetID(int ID)
@@ -250,10 +410,15 @@ namespace Arabic_Poems
             if (poem == "")
             {
                 //Read poem from the file
-                br.BaseStream.Position = start;
                 byte[] poem_encrypted_bytes = new byte[1];
                 try
-                { poem_encrypted_bytes = br.ReadBytes(Convert.ToInt32(length)); }
+                {
+                    lock (br)
+                    {
+                        br.BaseStream.Position = start;
+                        poem_encrypted_bytes = br.ReadBytes(Convert.ToInt32(length));
+                    }
+                }
                 catch (Exception)
                 { return null; }
 
@@ -273,10 +438,15 @@ namespace Arabic_Poems
             if (poem == "")
             {
                 //Read poem from the file
-                br.BaseStream.Position = start;
                 byte[] poem_encrypted_bytes = new byte[1];
                 try
-                { poem_encrypted_bytes = br.ReadBytes(Convert.ToInt32(length)); }
+                {
+                    lock (br)
+                    {
+                        br.BaseStream.Position = start;
+                        poem_encrypted_bytes = br.ReadBytes(Convert.ToInt32(length));
+                    }
+                }
                 catch (Exception ex)
                 {
                     error_message = ex.Message;
@@ -355,6 +525,8 @@ namespace Arabic_Poems
             }
         }
 
+        public double FontSize { get => Settings.FontSize; }
+
         public PoemVerse(int ID, string FirstLine, string SecontLine = "")
         {
             id = ID;
@@ -397,7 +569,7 @@ namespace Arabic_Poems
             PoemTag = tmp % 100000000;
         }
 
-        
+
         public static void AddPoem(string tag)
         {
             var item = new LastPoem(tag);
@@ -475,6 +647,115 @@ namespace Arabic_Poems
         }
     }
 
+    internal static class Settings
+    {
+        internal static double FontSize
+        {
+            get
+            {
+                object value = ApplicationData.Current.LocalSettings.Values["font_size"];
+                return value is double ? (double)value : 28;
+            }
+            set { ApplicationData.Current.LocalSettings.Values["font_size"] = value; }
+        }
+    }
+
+    internal static class Favourites
+    {
+        internal static List<Poem> Poems = new List<Poem>();
+
+        internal static bool Contains(Poem poem)
+        {
+            return Poems.Contains(poem);
+        }
+
+        internal static async Task Toggle(Poem poem)
+        {
+            if (Poems.Contains(poem))
+                Poems.Remove(poem);
+            else
+                Poems.Add(poem);
+            await Save();
+        }
+
+        internal static async Task Load()
+        {
+            Poems = new List<Poem>();
+            try
+            {
+                var file = await ApplicationData.Current.LocalFolder.TryGetItemAsync("favourites") as StorageFile;
+                if (file == null)
+                    return;
+                foreach (var line in await FileIO.ReadLinesAsync(file))
+                {
+                    var parts = line.Split('\t');
+                    if (parts.Length < 3)
+                        continue;
+                    var poem = Find(parts[0], parts[1], parts[2]);
+                    if (poem != null && !Poems.Contains(poem))
+                        Poems.Add(poem);
+                }
+            }
+            catch (Exception) { }
+        }
+
+        internal static async Task Save()
+        {
+            try
+            {
+                var file = await ApplicationData.Current.LocalFolder.CreateFileAsync("favourites", CreationCollisionOption.ReplaceExisting);
+                await FileIO.WriteLinesAsync(file, Poems.Select(p => p.versifier.name + "\t" + p.name + "\t" + p.versifier.Poems.IndexOf(p)).ToList());
+            }
+            catch (Exception) { }
+        }
+
+        internal static string GetTag(Poem poem)
+        {
+            return "n" + (Versifier.VersifiersList.IndexOf(poem.versifier) * 10000 + poem.versifier.Poems.IndexOf(poem));
+        }
+
+        private static Poem Find(string versifier_name, string poem_name, string index)
+        {
+            if (Versifier.VersifiersList == null)
+                return null;
+            int poem_index;
+            int.TryParse(index, out poem_index);
+            foreach (var v in Versifier.VersifiersList)
+                if (v.name == versifier_name)
+                {
+                    if (poem_index > -1 && poem_index < v.Poems.Count && v.Poems[poem_index].name == poem_name)
+                        return v.Poems[poem_index];
+                    foreach (var p in v.Poems)
+                        if (p.name == poem_name)
+                            return p;
+                }
+            return null;
+        }
+    }
+
+    public class NameWithIndex
+    {
+        string name;
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+
+        int index;
+        public int Index
+        {
+            get { return index; }
+            set { index = value; }
+        }
+
+        public NameWithIndex(string name, int index)
+        {
+            Name = name;
+            Index = index;
+        }
+    }
+
     internal enum Country
     {
         NotSpecefic = 0,
@@ -497,6 +778,10 @@ namespace Arabic_Poems
         Morocco,
         Mauritania,
         Yemen,
+        IraqAndSham = 21,
+        ArabianPeninsula,
+        EgyptAndSudan,
+        Maghreb,
         None = 99,
         All = 100
     }
@@ -533,6 +818,17 @@ namespace Arabic_Poems
         Khafif,
         Mujtath,
         Khabab,
+        Mutaqarib,
+        Madid,
+        Hazaj,
+        Mudari,
+        Muqtadab,
+        Multiple = 20,
+        FreeVerse,
+        Prose,
+        Muwashshah,
+        Dubait,
+        Mawaliya,
         None = 99,
         All = 100
     }

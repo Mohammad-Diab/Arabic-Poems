@@ -1,0 +1,51 @@
+﻿<Page
+    x:Class="Arabic_Poems.Pages.favourites"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Arabic_Poems.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" FlowDirection="RightToLeft">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="12,0,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0">
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <HyperlinkButton Margin="4" FontWeight="SemiLight" FontSize="20" VerticalAlignment="Center" Content="الشعر العربي" Click="HomeButton_Click"/>
+                <TextBlock Margin="4" FontSize="20" Text=">>" FontWeight="SemiLight" VerticalAlignment="Center"/>
+                <TextBlock x:Name="title" Margin="4" FontWeight="SemiLight" VerticalAlignment="Center" FontSize="24" Text="المفضلة"/>
+            </StackPanel>
+            <TextBlock x:Name="empty_text" Margin="4,24,0,0" Foreground="Gray" FontSize="18" TextWrapping="Wrap" Visibility="Collapsed" Text="لا توجد قصائد في المفضلة. افتح قصيدة واضغط «اضافة للمفضلة» لحفظها هنا."/>
+        </StackPanel>
+        <ListView x:Name="favourites_list" Grid.Row="1" Margin="0,12,12,0" ItemsSource="{Binding}" SelectionMode="None">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <HyperlinkButton Tag="{Binding Path=Tag}" HorizontalAlignment="Stretch" Foreground="RoyalBlue" HorizontalContentAlignment="Stretch" Click="ViewPoem_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB52;"/>
+                                <TextBlock Margin="10,0" Text="{Binding Path=Name}" FontFamily="{StaticResource AmiriFont}" FontSize="18"/>
+                                <TextBlock Text="{Binding Path=Description}" Foreground="Gray" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </HyperlinkButton>
+                        <Button Grid.Column="1" Tag="{Binding Path=Tag}" Background="Transparent" Click="Remove_Click" ToolTipService.ToolTip="ازالة من المفضلة">
+                            <SymbolIcon Symbol="Delete"/>
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>

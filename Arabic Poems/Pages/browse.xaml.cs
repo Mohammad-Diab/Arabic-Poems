@@ -5,8 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
-using System.Threading.Tasks;
-using Windows.ApplicationModel;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
@@ -173,7 +171,7 @@ namespace Arabic_Poems.Pages
                 int i;
                 for (i = 1; i < lines.Length; i++)
                 {
-                    poem_verses.Add(new PoemVerse(current_poem.is_vertical ? i : (i + 1) / 2,lines[i], current_poem.is_vertical ? "" : i + 1 < lines.Length ? lines[i + 1] : ""));
+                    poem_verses.Add(new PoemVerse(current_poem.is_vertical ? i : (i + 1) / 2, lines[i], current_poem.is_vertical ? "" : i + 1 < lines.Length ? lines[i + 1] : ""));
                     if (!current_poem.is_vertical)
                         i++;
                 }
@@ -186,11 +184,11 @@ namespace Arabic_Poems.Pages
             ////if (listView.Items.Count > 0)
             ////    listView.ScrollIntoView(listView.Items[0]);
 
-            
+
             search_result = null;
             current_result_index = -1;
             //listView.Items.Clear();
-            
+
 
             //if (current_poem.ReadPoem(br, out error_message))
             //{

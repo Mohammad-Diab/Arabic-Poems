@@ -5,26 +5,17 @@
     xmlns:local="using:Arabic_Poems.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" FlowDirection="RightToLeft">
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" FlowDirection="RightToLeft">
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <CommandBar DefaultLabelPosition="Right">
             <CommandBar.Content>
                 <StackPanel>
-                    <!-- ابحث في القصيدة الحالية - تصفية النتائج - الشعراء - القصائد-->
-                    <AutoSuggestBox  Margin="8" Width="225" PlaceholderText="ابحث في القصيدة الحالية" QueryIcon="Find"/>
+                    <AutoSuggestBox  Margin="8" Width="225" PlaceholderText="تصفية الشعراء" QueryIcon="Filter" TextChanged="Filter_TextChanged"/>
                 </StackPanel>
             </CommandBar.Content>
-            <AppBarButton Icon="OpenFile" Label="اختيار قصيدة"/>
-            <AppBarButton Icon="ReShare" Label="تبديل"/>
-            <AppBarSeparator/>
-            <AppBarButton Icon="Copy" Label="نسخ"/>
-            <AppBarButton Label="اضافة للمفضلة">
-                <AppBarButton.Icon>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB51;"/>
-                </AppBarButton.Icon>
-            </AppBarButton>
-            <AppBarSeparator/>
-            <AppBarButton Icon="Share" Label="مشاركة"/>
+            <AppBarButton Icon="OpenFile" Label="اختيار قصيدة" Click="SelectPoem_Click"/>
+            <AppBarButton Icon="ReShare" Label="تبديل" Click="RandomPoem_Click"/>
         </CommandBar>
         <Grid Margin="12,48,0,0">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
@@ -64,5 +55,5 @@
             </ScrollViewer>
         </Grid>
     </Grid>
-    
+
 </Page>

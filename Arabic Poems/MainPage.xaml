@@ -5,7 +5,8 @@
     xmlns:local="using:Arabic_Poems"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" FlowDirection="RightToLeft">
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"  FlowDirection="RightToLeft" Loaded="Page_Loaded">
 
     <NavigationView x:Name="navview"  SelectedItem="home" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" ItemInvoked="OnNavigationViewItemInvoked" AlwaysShowHeader="False">
         <NavigationView.MenuItems>
@@ -22,23 +23,41 @@
             </NavigationViewItem>
         </NavigationView.MenuItems>
         <NavigationView.AutoSuggestBox>
-            <AutoSuggestBox PlaceholderText="ابحث عن قصيدة أو شاعر" QueryIcon="Find"/>
+            <AutoSuggestBox x:Name="search_box" PlaceholderText="ابحث عن قصيدة أو شاعر" QueryIcon="Find" UpdateTextOnSelect="False" TextChanged="SearchBox_TextChanged" QuerySubmitted="SearchBox_QuerySubmitted">
+                <AutoSuggestBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Path=Name}"/>
+                            <TextBlock Text="{Binding Path=Description}" Foreground="Gray" FontSize="12"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </AutoSuggestBox.ItemTemplate>
+            </AutoSuggestBox>
         </NavigationView.AutoSuggestBox>
         <NavigationView.Content>
-            <Frame x:Name="ContentFrame">
-                <Frame.ContentTransitions>
-                    <TransitionCollection>
-                        <NavigationThemeTransition/>
-                    </TransitionCollection>
-                </Frame.ContentTransitions>
-            </Frame>
+            <Grid>
+                <Frame x:Name="ContentFrame">
+                    <Frame.ContentTransitions>
+                        <TransitionCollection>
+                            <NavigationThemeTransition/>
+                        </TransitionCollection>
+                    </Frame.ContentTransitions>
+                </Frame>
+                <StackPanel x:Name="empty_state" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
+                    <TextBlock Text="لم يتم تحديد ملف القصائد" Style="{StaticResource SubheaderTextBlockStyle}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="اختر ملف القصائد (Poems.dat) لعرض القصائد" Margin="0,12,0,0" HorizontalAlignment="Center"/>
+                    <Button Content="تحديد ملف" HorizontalAlignment="Center" Margin="0,24,0,0" Click="SelectFile_Click"/>
+                </StackPanel>
+            </Grid>
         </NavigationView.Content>
         <!--<NavigationView.HeaderTemplate>
             <DataTemplate>
                 <CommandBar DefaultLabelPosition="Right">
                 <CommandBar.Content>
                     <StackPanel>
-                        --><!-- ابحث في القصيدة الحالية - تصفية النتائج - الشعراء - القصائد--><!--
+                        -->
+        <!-- ابحث في القصيدة الحالية - تصفية النتائج - الشعراء - القصائد-->
+        <!--
                         <AutoSuggestBox x:Name="search_box" Margin="8" Width="225" PlaceholderText="ابحث في القصيدة الحالية" QueryIcon="Find"/>
                     </StackPanel>
                 </CommandBar.Content>
@@ -57,4 +76,5 @@
             </DataTemplate>
         </NavigationView.HeaderTemplate>-->
     </NavigationView>
+
 </Page>

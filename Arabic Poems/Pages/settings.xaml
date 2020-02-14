@@ -1,0 +1,21 @@
+﻿<Page
+    x:Class="Arabic_Poems.Pages.settings"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Arabic_Poems.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" FlowDirection="RightToLeft">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16,8,16,16" MaxWidth="700" HorizontalAlignment="Left">
+            <TextBlock Text="الإعدادات" Style="{StaticResource SubheaderTextBlockStyle}"/>
+            <TextBlock Margin="0,24,0,0" Text="حجم خط القصائد" FontSize="20" FontWeight="SemiLight"/>
+            <Slider x:Name="font_slider" Margin="0,8,0,0" Minimum="16" Maximum="48" StepFrequency="2" TickFrequency="4" TickPlacement="Outside" ValueChanged="FontSlider_ValueChanged"/>
+            <TextBlock x:Name="sample_text" Margin="0,8,0,0" FontFamily="{StaticResource AmiriFont}" TextWrapping="Wrap" Text="قفا نبك من ذكرى حبيب ومنزل     بسقط اللوى بين الدخول فحومل"/>
+            <TextBlock Margin="0,36,0,0" Text="ملف القصائد" FontSize="20" FontWeight="SemiLight"/>
+            <TextBlock x:Name="file_name" Margin="0,8,0,0" Foreground="Gray" TextWrapping="Wrap" FlowDirection="LeftToRight" HorizontalAlignment="Right"/>
+            <Button Margin="0,12,0,0" Content="تحديد ملف آخر" Click="SelectFile_Click"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

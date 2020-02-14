@@ -5,12 +5,14 @@
     xmlns:local="using:Arabic_Poems.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" FlowDirection="RightToLeft">
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" FlowDirection="RightToLeft">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
         <CommandBar DefaultLabelPosition="Right">
-            <AppBarButton Icon="ReShare" Label="تبديل"/>
+            <AppBarButton Icon="OpenFile" Label="اختيار قصيدة" Click="SelectPoem_Click"/>
+            <AppBarButton Icon="ReShare" Label="تبديل" Click="RandomPoem_Click"/>
         </CommandBar>
         <Grid Margin="12,48,0,0">
             <Grid.ColumnDefinitions>
@@ -36,6 +38,7 @@
                         <FontIcon FontSize="24" FontWeight="SemiLight" FontFamily="Segoe MDL2 Assets" Glyph="&#xE823;"/>
                         <TextBlock Margin="12,0,0,0" FontSize="20" FontWeight="SemiLight" OpticalMarginAlignment="TrimSideBearings" Text="المعروضة أخيرا" />
                     </StackPanel>
+                    <TextBlock x:Name="empty_recent" Margin="36,12,36,0" Text="لم تعرض أي قصيدة بعد" Foreground="Gray" Visibility="Collapsed"/>
                     <ListView x:Name="last_poem_list" SelectionMode="None" ItemsSource="{Binding}" Margin="0,12,36,0" VerticalAlignment="Top">
                         <!--<RelativePanel Margin="0,4" HorizontalAlignment="Stretch">
                             <StackPanel HorizontalAlignment="Left" RelativePanel.AlignTopWithPanel="True" Orientation="Horizontal">
@@ -44,13 +47,13 @@
                             </StackPanel>
                             <Rectangle Style="{StaticResource RectangleStyle}" Width="60" Height="12" RelativePanel.AlignRightWithPanel="True"/>
                         </RelativePanel>-->
-                        
+
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment"  Value="Stretch"></Setter>
                             </Style>
                         </ListView.ItemContainerStyle>
-                        
+
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <HyperlinkButton Tag="{Binding Path=Tag}" Margin="0,0,12,0" HorizontalAlignment="Stretch" Foreground="RoyalBlue" HorizontalContentAlignment="Stretch"  Click="ViewPoem_Click">
@@ -64,32 +67,20 @@
                                 </HyperlinkButton>
                             </DataTemplate>
                         </ListView.ItemTemplate>
-                        
+
                     </ListView>
 
-                    <StackPanel Margin="0,24,0,0" Orientation="Horizontal">
+                    <StackPanel x:Name="bahar_header" Margin="0,24,0,0" Orientation="Horizontal" Visibility="Collapsed">
                         <FontIcon FontSize="24" FontWeight="SemiLight" FontFamily="Segoe MDL2 Assets" Glyph="&#xE7E3;"/>
                         <TextBlock Margin="12,0,0,0" FontSize="20" FontWeight="SemiLight" OpticalMarginAlignment="TrimSideBearings" Text="تصنيف القصائد حسب البحر الذي تنتمي اليه"/>
                     </StackPanel>
-                    <GridView Margin="0,12,0,0" VerticalAlignment="Top" SelectionMode="None">
+                    <GridView x:Name="bahar_grid" Margin="0,12,0,0" VerticalAlignment="Top" SelectionMode="None" Visibility="Collapsed">
                         <GridView.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapGrid MaximumRowsOrColumns="2" Orientation="Horizontal" HorizontalChildrenAlignment="Stretch" VerticalChildrenAlignment="Stretch">
                                 </WrapGrid>
                             </ItemsPanelTemplate>
                         </GridView.ItemsPanel>
-                        <HyperlinkButton Content="المتدارك" Foreground="RoyalBlue" Tag="1" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="الطويل" Foreground="RoyalBlue" Tag="2" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="الوافر" Foreground="RoyalBlue" Tag="3" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="البسيط" Foreground="RoyalBlue" Tag="4" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="الكامل" Foreground="RoyalBlue" Tag="5" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="الرجز" Foreground="RoyalBlue" Tag="6" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="الرمل" Foreground="RoyalBlue" Tag="7" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="السريع" Foreground="RoyalBlue" Tag="8" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="المنسرح" Foreground="RoyalBlue" Tag="9" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="الخفيف" Foreground="RoyalBlue" Tag="10" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="المجتث" Foreground="RoyalBlue" Tag="11" Click="ViewPoetBahar_Click"/>
-                        <HyperlinkButton Content="الخبب" Foreground="RoyalBlue" Tag="12" Click="ViewPoetBahar_Click"/>
                     </GridView>
                 </StackPanel>
             </ScrollViewer>
@@ -99,7 +90,7 @@
                         <FontIcon FontSize="24" FontWeight="SemiLight" FontFamily="Segoe MDL2 Assets" Glyph="&#xEC92;"/>
                         <TextBlock Margin="12,0,0,0" FontSize="20" FontWeight="SemiLight" OpticalMarginAlignment="TrimSideBearings" Text="تصنيف الشعراء حسب العصر"/>
                     </StackPanel>
-                    <GridView Margin="0,12,0,0" VerticalAlignment="Top" SelectionMode="None">
+                    <GridView x:Name="ages_grid" Margin="0,12,0,0" VerticalAlignment="Top" SelectionMode="None">
                         <GridView.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapGrid MaximumRowsOrColumns="3" Orientation="Horizontal" HorizontalChildrenAlignment="Stretch" VerticalChildrenAlignment="Stretch">
@@ -119,7 +110,7 @@
                     </GridView>
                     <StackPanel Margin="0,24,0,0" Orientation="Horizontal">
                         <FontIcon FontSize="24" FontWeight="SemiLight" FontFamily="Segoe MDL2 Assets" Glyph="&#xE774;"/>
-                        <TextBlock Margin="12,0,0,0" FontSize="20" FontWeight="SemiLight" OpticalMarginAlignment="TrimSideBearings" Text="تصنيف الشعراء حسب الدولة"/>
+                        <TextBlock Margin="12,0,0,0" FontSize="20" FontWeight="SemiLight" OpticalMarginAlignment="TrimSideBearings" Text="شعراء العصر الحديث حسب المنطقة"/>
                     </StackPanel>
                     <GridView Margin="0,12,0,0" VerticalAlignment="Top" SelectionMode="None">
                         <GridView.ItemsPanel>
@@ -128,25 +119,10 @@
                                 </WrapGrid>
                             </ItemsPanelTemplate>
                         </GridView.ItemsPanel>
-                        <HyperlinkButton Content="المملكة الأردنية" Foreground="RoyalBlue" Tag="1" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="الإمارات" Foreground="RoyalBlue" Tag="2" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="البحرين" Foreground="RoyalBlue" Tag="3" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="تونس" Foreground="RoyalBlue" Tag="4" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="الجزائر" Foreground="RoyalBlue" Tag="5" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="السعودية" Foreground="RoyalBlue" Tag="6" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="السودان" Foreground="RoyalBlue" Tag="7" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="سوريا" Foreground="RoyalBlue" Tag="8" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="العراق" Foreground="RoyalBlue" Tag="9" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="عمان" Foreground="RoyalBlue" Tag="10" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="فلسطين" Foreground="RoyalBlue" Tag="11" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="قطر" Foreground="RoyalBlue" Tag="12" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="الكويت" Foreground="RoyalBlue" Tag="13" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="لبنان" Foreground="RoyalBlue" Tag="14" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="ليبيا" Foreground="RoyalBlue" Tag="15" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="مصر" Foreground="RoyalBlue" Tag="16" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="المغرب" Foreground="RoyalBlue" Tag="17" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="موريتانيا" Foreground="RoyalBlue" Tag="18" Click="ViewCountryPoets_Click"/>
-                        <HyperlinkButton Content="اليمن" Foreground="RoyalBlue" Tag="19" Click="ViewCountryPoets_Click"/>
+                        <HyperlinkButton Content="شعراء العراق والشام" Foreground="RoyalBlue" Tag="21" Click="ViewCountryPoets_Click"/>
+                        <HyperlinkButton Content="شعراء الجزيرة العربية" Foreground="RoyalBlue" Tag="22" Click="ViewCountryPoets_Click"/>
+                        <HyperlinkButton Content="شعراء مصر والسودان" Foreground="RoyalBlue" Tag="23" Click="ViewCountryPoets_Click"/>
+                        <HyperlinkButton Content="شعراء المغرب العربي" Foreground="RoyalBlue" Tag="24" Click="ViewCountryPoets_Click"/>
                     </GridView>
                 </StackPanel>
             </ScrollViewer>

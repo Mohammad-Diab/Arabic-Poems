@@ -24,6 +24,7 @@ namespace Arabic_Poems.Pages
     public sealed partial class poet : Page
     {
         ObservableCollection<ListItemTemplate> list = new ObservableCollection<ListItemTemplate>();
+        List<ListItemTemplate> all = new List<ListItemTemplate>();
 
         public poet()
         {
@@ -35,6 +36,8 @@ namespace Arabic_Poems.Pages
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             list.Clear();
+            if (Versifier.VersifiersList == null || e.Parameter == null)
+                return;
             long prt;
             long.TryParse(e.Parameter.ToString().Substring(1), out prt);
             char section = e.Parameter.ToString()[0];
@@ -52,14 +55,11 @@ namespace Arabic_Poems.Pages
                     if (prt == (int)Versifier.VersifiersList[i].poet_country)
                         list.Add(new ListItemTemplate(Versifier.VersifiersList[i].name, Functions.Poem(Versifier.VersifiersList[i].peoms_count), section + "" + (10000 * prt + i)));
                 }
-                else if(section=='b')
+                else if (section == 'b')
                 {
-                    foreach(var poem in Versifier.VersifiersList[i].Poems)
-                        if(prt==(int)poem.poem_bahar)
-                        {
-                            list.Add(new ListItemTemplate(Versifier.VersifiersList[i].name, Functions.Poem(Versifier.VersifiersList[i].peoms_count), section + "" + (10000 * prt + i)));
-                            break;
-                        }
+                    int count = Versifier.VersifiersList[i].Poems.Count(poem => prt == (int)poem.poem_bahar);
+                    if (count > 0)
+                        list.Add(new ListItemTemplate(Versifier.VersifiersList[i].name, Functions.Poem(count), section + "" + (10000 * prt + i)));
                 }
             }
             if (section == 'a')
@@ -71,6 +71,27 @@ namespace Arabic_Poems.Pages
             else if (section == 'n')
                 subtitle.Text = "كل الشعراء";
             title.Text = (section == 'n' || section == 'b' ? "" : "شعراء ") + subtitle.Text + " (" + Functions.Poet(list.Count) + ")";
+            all = list.ToList();
+        }
+
+        private void Filter_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            string word = Functions.RemoveAccents(sender.Text.Trim());
+            list.Clear();
+            foreach (var i in all)
+                if (word.Length == 0 || Functions.RemoveAccents(i.Name).Contains(word))
+                    list.Add(i);
+        }
+
+        private void RandomPoem_Click(object sender, RoutedEventArgs e)
+        {
+            if (Versifier.VersifiersList != null)
+                Functions.Navigate(typeof(view), Functions.RandomPoemTag());
+        }
+
+        private void SelectPoem_Click(object sender, RoutedEventArgs e)
+        {
+            Functions.SelectPoem();
         }
 
         private void HomeButton_Click(object sender, RoutedEventArgs e)

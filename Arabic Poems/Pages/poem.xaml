@@ -5,26 +5,17 @@
     xmlns:local="using:Arabic_Poems.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" FlowDirection="RightToLeft">
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" FlowDirection="RightToLeft">
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <CommandBar DefaultLabelPosition="Right">
             <CommandBar.Content>
                 <StackPanel>
-                    <!-- ابحث في القصيدة الحالية - تصفية النتائج - الشعراء - القصائد-->
-                    <AutoSuggestBox  Margin="8" Width="225" PlaceholderText="ابحث في القصيدة الحالية" QueryIcon="Find"/>
+                    <AutoSuggestBox  Margin="8" Width="225" PlaceholderText="تصفية القصائد" QueryIcon="Filter" TextChanged="Filter_TextChanged"/>
                 </StackPanel>
             </CommandBar.Content>
-            <AppBarButton Icon="OpenFile" Label="اختيار قصيدة"/>
-            <AppBarButton Icon="ReShare" Label="تبديل"/>
-            <AppBarSeparator/>
-            <AppBarButton Icon="Copy" Label="نسخ"/>
-            <AppBarButton Label="اضافة للمفضلة">
-                <AppBarButton.Icon>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB51;"/>
-                </AppBarButton.Icon>
-            </AppBarButton>
-            <AppBarSeparator/>
-            <AppBarButton Icon="Share" Label="مشاركة"/>
+            <AppBarButton Icon="OpenFile" Label="اختيار قصيدة" Click="SelectPoem_Click"/>
+            <AppBarButton Icon="ReShare" Label="تبديل" Click="RandomPoem_Click"/>
         </CommandBar>
         <Grid Margin="12,48,0,0">
             <Grid.ColumnDefinitions>
@@ -51,11 +42,12 @@
                             <Run Text=")"/>
                         </TextBlock>
                     </StackPanel>
-                    <ListView ItemsSource="{Binding}" SelectionMode="None" Margin="0,12,24,0" x:Name="poems_list" VerticalAlignment="Top">
+                    <ListView ItemsSource="{Binding}" SelectionMode="None" Margin="0,12,24,0" x:Name="poems_list" FontFamily="{StaticResource AmiriFont}" VerticalAlignment="Top">
 
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
-                                <Setter Property="HorizontalContentAlignment"  Value="Stretch"></Setter>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                                <Setter Property="FontFamily" Value="{StaticResource AmiriFont}"></Setter>
                             </Style>
                         </ListView.ItemContainerStyle>
 
@@ -78,14 +70,9 @@
                         <FontIcon FontSize="24" FontWeight="SemiLight" FontFamily="Segoe MDL2 Assets" Glyph="&#xF272;"/>
                         <TextBlock Margin="12,0,0,0" FontSize="24" FontWeight="SemiLight" OpticalMarginAlignment="TrimSideBearings" Text="لمحة عن حياة الشاعر" />
                     </StackPanel>
-                    <Image Source="ms-appx:///Assets/Square150x150Logo.png" Margin="0,12,24,0" Width="196" HorizontalAlignment="Center" Height="196" VerticalAlignment="Top"/>
-                    <TextBlock Margin="0,12,0,0" Text="عنتر بن شداد" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top" Style="{StaticResource SubheaderTextBlockStyle}"/>
-                    <Rectangle Margin="0,12,0,0" Style="{StaticResource RectangleStyle}" Width="300" Height="16"/>
-                    <TextBlock Margin="0,24,0,0" Visibility="Collapsed" FontSize="18" FontWeight="SemiLight" Text="بلا بلا بلا بلا"/>
-                    <Rectangle Margin="0,24,50,0" Style="{StaticResource RectangleStyle}" HorizontalAlignment="Stretch" Height="12"/>
-                    <Rectangle Margin="0,24,150,0" Style="{StaticResource RectangleStyle}" HorizontalAlignment="Stretch" Height="12"/>
-                    <Rectangle Margin="0,24,180,0" Style="{StaticResource RectangleStyle}" HorizontalAlignment="Stretch" Height="12"/>
-                    <Rectangle Margin="0,24,0,0" Style="{StaticResource RectangleStyle}" HorizontalAlignment="Left" Width="100" Height="12"/>
+                    <TextBlock x:Name="poet_glance_name" Margin="0,12,0,0" Text="" HorizontalAlignment="Center" VerticalAlignment="Top" Style="{StaticResource SubheaderTextBlockStyle}"/>
+                    <TextBlock x:Name="poet_glance_age" Margin="0,8,0,0" Text="" HorizontalAlignment="Center" Foreground="Gray" FontSize="16"/>
+                    <TextBlock x:Name="poet_glance_info" Margin="0,24,24,24" FontSize="18" FontWeight="SemiLight" TextWrapping="Wrap" Text=""/>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

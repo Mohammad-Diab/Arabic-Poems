@@ -2,9 +2,9 @@
     x:Class="Arabic_Poems.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Arabic_Poems"
-    RequestedTheme="Light">
+    xmlns:local="using:Arabic_Poems" RequestedTheme="Light">
     <Application.Resources>
+        <FontFamily x:Key="AmiriFont">ms-appx:///Assets/Fonts/Amiri-Regular.ttf#Amiri</FontFamily>
         <Style x:Key="RectangleStyle" TargetType="Rectangle">
             <Setter Property="Fill">
                 <Setter.Value>

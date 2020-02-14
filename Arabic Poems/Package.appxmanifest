@@ -7,15 +7,15 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="35918706-b0e6-4c72-b016-d25afd5cdfc8"
-    Publisher="CN=DrMoh"
-    Version="1.0.0.0" />
+    Name="19e0eee5-be08-46e7-8754-6e19e1bc73e7"
+    Publisher="CN=Administrator"
+    Version="1.0.2.0" />
 
-  <mp:PhoneIdentity PhoneProductId="35918706-b0e6-4c72-b016-d25afd5cdfc8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="19e0eee5-be08-46e7-8754-6e19e1bc73e7" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>Arabic Poems</DisplayName>
-    <PublisherDisplayName>DrMoh</PublisherDisplayName>
+    <PublisherDisplayName>Admistrator</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
