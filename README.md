@@ -46,16 +46,10 @@ Windows 10 version 1709 or later, or Windows 11, x64.
 ## Install
 
 1. Download the `.7z` file of the latest version from [Releases](https://github.com/Mohammad-Diab/Arabic-Poems/releases) and extract it.
-2. Turn on Developer Mode: **Settings > System > For developers** (on Windows 10: **Settings > Update & Security > For developers**).
-3. In PowerShell, register the app from the extracted folder:
+2. Double-click `Install.cmd` in the extracted folder and accept the administrator prompt. The script adds the package's certificate (`Arabic-Poems.cer`) to **Trusted People** on the PC, installs the framework packages from the `Dependencies` folder that are missing (.NET Native 2.2 and VCLibs 14.0, x64), then installs the signed app package. Developer Mode is not needed.
+3. Start **Arabic Poems** from the Start menu and pick `Poems.dat` from the extracted folder. The app remembers it; another file can be picked in the settings.
 
-   ```powershell
-   Add-AppxPackage -Register "<extracted folder>\AppX\AppxManifest.xml"
-   ```
-
-4. Start **Arabic Poems** from the Start menu and pick `Poems.dat` from the extracted folder. The app remembers it; another file can be picked in the settings.
-
-The app is not signed with a trusted certificate, which is why it is registered in Developer Mode instead of installed by double-click. To remove it, uninstall it from the Start menu. Keep the extracted folder: the registered app runs from it.
+The package is signed with a self-signed certificate, which is why the certificate is added to Trusted People first; only the administrator prompt for that step needs elevation, the app is installed for the current user. To remove the app, uninstall it from the Start menu, or right-click `Uninstall.ps1` and pick **Run with PowerShell**: it also removes the certificate when no other app from the same publisher is installed. The installed app does not need the extracted folder, only `Poems.dat`. The older versions on the Releases page install the same way.
 
 ## Building
 
